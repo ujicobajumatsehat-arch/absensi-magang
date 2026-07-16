@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absensi Magang — PT Graha Sarana Gresik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy: #14274E;
+    --navy-soft: #1F3B6E;
+    --paper: #F5F6F8;
+    --surface: #FFFFFF;
+    --line: #E3E6EC;
+    --ink: #16192B;
+    --muted: #6B7280;
+    --in: #1F9D55;
+    --in-soft: #E7F6EC;
+    --out: #C9791A;
+    --out-soft: #FBEEDD;
+    --danger: #C93B3B;
+    --danger-soft: #FBEAEA;
+    --radius: 16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1c3562 0%, rgba(28,53,98,0) 60%),
+      var(--paper);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding: 32px 16px 60px;
+  }
+  .app{
+    width:100%;
+    max-width:440px;
+  }
+  .masthead{
+    text-align:center;
+    color:#fff;
+    padding: 8px 12px 28px;
+  }
+  .masthead .eyebrow{
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:#B9C7E6;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .masthead h1{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-size:24px;
+    font-weight:800;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .masthead .sub{
+    font-size:13px;
+    color:#C3CEE6;
+  }
+  .clock{
+    margin-top:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.16);
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:13px;
+    color:#EAF0FF;
+  }
+  .dot-live{
+    width:7px;height:7px;border-radius:50%;
+    background:#5CE08A;
+    box-shadow:0 0 0 0 rgba(92,224,138,.6);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(92,224,138,.55);}
+    70%{box-shadow:0 0 0 8px rgba(92,224,138,0);}
+    100%{box-shadow:0 0 0 0 rgba(92,224,138,0);}
+  }
+
+  .card{
+    background:var(--surface);
+    border-radius:var(--radius);
+    box-shadow: 0 1px 2px rgba(20,39,78,.06), 0 12px 32px -12px rgba(20,39,78,.25);
+    overflow:hidden;
+  }
+
+  .tabs{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    background:var(--paper);
+    padding:6px;
+    gap:6px;
+  }
+  .tab{
+    border:none;
+    background:transparent;
+    padding:12px 8px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--muted);
+    border-radius:10px;
+    cursor:pointer;
+    transition: all .18s ease;
+  }
+  .tab.active[data-tab="checkin"]{ background:var(--in); color:#fff; }
+  .tab.active[data-tab="checkout"]{ background:var(--out); color:#fff; }
+
+  .panel{ padding:22px; display:none; }
+  .panel.active{ display:block; }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .field input, .field textarea{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:#fff;
+    transition:border-color .15s ease;
+  }
+  .field textarea{ resize:vertical; min-height:80px; }
+  .field input:focus, .field textarea:focus{
+    outline:none;
+    border-color: var(--navy-soft);
+  }
+
+  .radar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:10px;
+    background:var(--paper);
+    margin-bottom:18px;
+    font-size:13px;
+    color:var(--muted);
+    min-height:20px;
+  }
+  .radar-dot{
+    width:10px;height:10px;border-radius:50%;
+    background:#CBD3E1;
+    flex-shrink:0;
+    transition: background .2s ease;
+  }
+  .radar-dot.seeking{
+    background:#3B6FE0;
+    animation:pulse-blue 1.2s infinite;
+  }
+  .radar-dot.ok{ background:var(--in); }
+  .radar-dot.fail{ background:var(--danger); }
+  @keyframes pulse-blue{
+    0%{box-shadow:0 0 0 0 rgba(59,111,224,.5);}
+    70%{box-shadow:0 0 0 7px rgba(59,111,224,0);}
+    100%{box-shadow:0 0 0 0 rgba(59,111,224,0);}
+  }
+
+  button.submit{
+    width:100%;
+    border:none;
+    padding:14px;
+    border-radius:10px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    color:#fff;
+    cursor:pointer;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  button.submit:active{ transform: scale(0.98); }
+  button.submit:disabled{ opacity:.55; cursor:not-allowed; }
+  #panel-checkin button.submit{ background: var(--in); }
+  #panel-checkout button.submit{ background: var(--out); }
+
+  .msg{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:13.5px;
+    line-height:1.45;
+    display:none;
+  }
+  .msg.show{ display:block; }
+  .msg.success{ background:var(--in-soft); color:#166534; }
+  .msg.error{ background:var(--danger-soft); color:#9B2C2C; }
+
+  .footnote{
+    text-align:center;
+    font-size:11.5px;
+    color:#9AA3B5;
+    margin-top:18px;
+    padding: 0 20px;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <div class="eyebrow">PT Graha Sarana Gresik</div>
+    <h1>Absensi Anak Magang</h1>
+    <div class="sub">Catat kehadiran &amp; kegiatan harian secara digital</div>
+    <div class="clock"><span class="dot-live"></span><span id="clockText">—</span></div>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="checkin" onclick="switchTab('checkin')">Check-in</button>
+      <button class="tab" data-tab="checkout" onclick="switchTab('checkout')">Check-out</button>
+    </div>
+
+    <!-- CHECK-IN -->
+    <div class="panel active" id="panel-checkin">
+      <div class="field">
+        <label for="ci-nama">Nama lengkap</label>
+        <input id="ci-nama" type="text" placeholder="Nama sesuai identitas">
+      </div>
+      <div class="field">
+        <label for="ci-nim">NIM / NIS</label>
+        <input id="ci-nim" type="text" placeholder="Nomor induk mahasiswa/siswa">
+      </div>
+      <div class="field">
+        <label for="ci-asal">Asal sekolah / universitas</label>
+        <input id="ci-asal" type="text" placeholder="Contoh: Universitas Airlangga">
+      </div>
+      <div class="field">
+        <label for="ci-unit">Unit kerja</label>
+        <input id="ci-unit" type="text" placeholder="Contoh: SDM, Procurement, Sekretariat">
+      </div>
+
+      <div class="radar" id="ci-radar">
+        <span class="radar-dot" id="ci-radar-dot"></span>
+        <span id="ci-radar-text">Lokasi akan diperiksa saat kamu menekan tombol check-in.</span>
+      </div>
+
+      <button class="submit" id="ci-btn" onclick="doCheckin()">Absen Masuk</button>
+      <div class="msg" id="ci-msg"></div>
+    </div>
+
+    <!-- CHECK-OUT -->
+    <div class="panel" id="panel-checkout">
+      <div class="field">
+        <label for="co-nama">Nama lengkap</label>
+        <input id="co-nama" type="text" placeholder="Sama seperti saat check-in">
+      </div>
+      <div class="field">
+        <label for="co-nim">NIM / NIS</label>
+        <input id="co-nim" type="text" placeholder="Sama seperti saat check-in">
+      </div>
+      <div class="field">
+        <label for="co-kegiatan">Kegiatan yang sudah dilakukan hari ini</label>
+        <textarea id="co-kegiatan" placeholder="Ringkas kegiatan/tugas yang dikerjakan hari ini"></textarea>
+      </div>
+
+      <button class="submit" id="co-btn" onclick="doCheckout()">Absen Pulang</button>
+      <div class="msg" id="co-msg"></div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    Lokasi GPS digunakan untuk memverifikasi kehadiran di area PT GSG saat check-in.<br>
+    Pastikan GPS/lokasi perangkat aktif sebelum menekan tombol.
+  </div>
+</div>
+
+<script>
+  // TODO: ganti dengan URL Web App hasil deploy Google Apps Script (Code.gs)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyM9HV4RDUtm5X1QT3HY2Lg1woeSdfSaqy4UKhB3Q-MGmJLJ56QwiXtIaecjfjPdTWh/exec';
+
+  function switchTab(tab){
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('panel-checkin').classList.toggle('active', tab === 'checkin');
+    document.getElementById('panel-checkout').classList.toggle('active', tab === 'checkout');
+  }
+
+  function updateClock(){
+    const now = new Date();
+    const opts = { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' };
+    document.getElementById('clockText').textContent = now.toLocaleString('id-ID', opts) + ' WIB';
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function showMsg(id, type, text){
+    const el = document.getElementById(id);
+    el.className = 'msg show ' + type;
+    el.textContent = text;
+  }
+
+  function getLocation(){
+    return new Promise((resolve, reject) => {
+      if(!navigator.geolocation){
+        reject(new Error('Perangkat tidak mendukung layanan lokasi.'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve(pos.coords),
+        err => reject(new Error('Gagal mengambil lokasi. Pastikan izin lokasi diaktifkan.')),
+        { enableHighAccuracy:true, timeout:12000 }
+      );
+    });
+  }
+
+  async function postData(payload){
+    const res = await fetch(API_URL, {
+      method:'POST',
+      headers: { 'Content-Type':'text/plain;charset=utf-8' }, // hindari CORS preflight ke Apps Script
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  async function doCheckin(){
+    const nama = document.getElementById('ci-nama').value.trim();
+    const nim = document.getElementById('ci-nim').value.trim();
+    const asalInstitusi = document.getElementById('ci-asal').value.trim();
+    const unitKerja = document.getElementById('ci-unit').value.trim();
+    const btn = document.getElementById('ci-btn');
+    const dot = document.getElementById('ci-radar-dot');
+    const radarText = document.getElementById('ci-radar-text');
+
+    document.getElementById('ci-msg').classList.remove('show');
+
+    if(!nama || !nim || !asalInstitusi || !unitKerja){
+      showMsg('ci-msg', 'error', 'Mohon lengkapi semua data terlebih dahulu.');
+      return;
+    }
+
+    if(API_URL.includes('GANTI_DENGAN_URL')){
+      showMsg('ci-msg', 'error', 'API_URL belum diisi. Tempel URL Web App Apps Script di index.html.');
+      return;
+    }
+
+    btn.disabled = true;
+    dot.className = 'radar-dot seeking';
+    radarText.textContent = 'Mengambil lokasi kamu…';
+
+    try{
+      const coords = await getLocation();
+      dot.className = 'radar-dot ok';
+      radarText.textContent = 'Lokasi ditemukan, mengirim data absen…';
+
+      const result = await postData({
+        action:'checkin',
+        nama, nim, asalInstitusi, unitKerja,
+        lat: coords.latitude, lng: coords.longitude
+      });
+
+      if(result.status === 'success'){
+        radarText.textContent = 'Status lokasi: ' + result.statusLokasi;
+        showMsg('ci-msg', 'success', result.message);
+      } else {
+        dot.className = 'radar-dot fail';
+        showMsg('ci-msg', 'error', result.message);
+      }
+    } catch(err){
+      dot.className = 'radar-dot fail';
+      radarText.textContent = err.message;
+      showMsg('ci-msg', 'error', err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function doCheckout(){
+    const nama = document.getElementById('co-nama').value.trim();
+    const nim = document.getElementById('co-nim').value.trim();
+    const kegiatan = document.getElementById('co-kegiatan').value.trim();
+    const btn = document.getElementById('co-btn');
+
+    document.getElementById('co-msg').classList.remove('show');
+
+    if(!nama || !nim || !kegiatan){
+      showMsg('co-msg', 'error', 'Mohon lengkapi nama, NIM/NIS, dan kegiatan yang sudah dilakukan.');
+      return;
+    }
+
+    if(API_URL.includes('GANTI_DENGAN_URL')){
+      showMsg('co-msg', 'error', 'API_URL belum diisi. Tempel URL Web App Apps Script di index.html.');
+      return;
+    }
+
+    btn.disabled = true;
+    try{
+      const result = await postData({ action:'checkout', nama, nim, kegiatan });
+      showMsg('co-msg', result.status === 'success' ? 'success' : 'error', result.message);
+    } catch(err){
+      showMsg('co-msg', 'error', 'Gagal mengirim data: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
