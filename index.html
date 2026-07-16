@@ -444,7 +444,7 @@
       return;
     }
 
-    if(API_URL.includes('https://script.google.com/macros/s/AKfycbyM9HV4RDUtm5X1QT3HY2Lg1woeSdfSaqy4UKhB3Q-MGmJLJ56QwiXtIaecjfjPdTWh/exec')){
+    if(!API_URL || API_URL.includes('PASTE_URL_DISINI')){
       showMsg('co-msg', 'error', 'API_URL belum diisi. Tempel URL Web App Apps Script di index.html.');
       return;
     }
